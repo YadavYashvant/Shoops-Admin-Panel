@@ -1,3 +1,4 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -38,13 +39,34 @@ class _AddItemState extends State<AddItem> {
     return await ref.getDownloadURL();
   }
 
-  Future<void> _addItem() async {
+  Future<void> _addItem(context) async {
     final imageUrl = await _uploadImage();
     await FirebaseFirestore.instance.collection('items').add({
       'name': _name,
       'price': _price,
       'imageurl': imageUrl,
     });
+    final materialBanner = MaterialBanner(
+      /// need to set following properties for best effect of awesome_snackbar_content
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      forceActionsBelow: true,
+      content: AwesomeSnackbarContent(
+        title: 'Oh Hey!! 🥳',
+        message:
+        'A new item has been added successfully to the catalogue.',
+
+        /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
+        contentType: ContentType.success,
+        // to configure for material banner
+        inMaterialBanner: true,
+      ),
+      actions: const [SizedBox.shrink()],
+    );
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentMaterialBanner()
+      ..showMaterialBanner(materialBanner);
   }
 
   @override
@@ -152,7 +174,7 @@ class _AddItemState extends State<AddItem> {
                   _name = _nameController.text;
                   _price = _priceController.text;
                   if (_name!.isNotEmpty && _price!.isNotEmpty && _imageFile != null) {
-                    await _addItem();
+                    await _addItem(context);
                     _nameController.clear();
                     _priceController.clear();
                     setState(() {
